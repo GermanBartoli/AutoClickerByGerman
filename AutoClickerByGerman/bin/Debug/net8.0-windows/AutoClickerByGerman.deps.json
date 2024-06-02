@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "AutoClickerByGerman/1.0.0": {
+        "runtime": {
+          "AutoClickerByGerman.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AutoClickerByGerman/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
