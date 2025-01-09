@@ -44,19 +44,48 @@ namespace AutoClickerByGerman
             keyboardHook.KeyPressed += Form1_KeyPressed;
         }
 
+        private const byte VK_2 = 0x32; // Código virtual para la tecla '2'
+
+        private const byte VK_3 = 0x33;               // Código virtual para la tecla '3'
+        private void PressKey3()
+        {
+            // Simular presionar la tecla '3'
+            keybd_event(VK_3, 0, KEYEVENTF_KEYDOWN, 0);
+
+            // Simular soltar la tecla '3'
+            keybd_event(VK_3, 0, KEYEVENTF_KEYUP, 0);            
+            
+            // Simular presionar la tecla '3'
+            keybd_event(VK_2, 0, KEYEVENTF_KEYDOWN, 0);
+
+            // Simular soltar la tecla '3'
+            keybd_event(VK_2, 0, KEYEVENTF_KEYUP, 0);
+        }
         private void DoMouseClick()
         {
             //mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); // Presionar el botón izquierdo
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
+            mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+
+            mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+            mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
+            mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+
+
             //mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
             //mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
-            
+
             // Simular presionar la tecla Shift
-            keybd_event((byte)Keys.ShiftKey, 0, 0, UIntPtr.Zero);
+            //keybd_event((byte)Keys.ShiftKey, 0, 0, UIntPtr.Zero);
 
             // Simular clic derecho del mouse
-            keybd_event((byte)Keys.ShiftKey, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            //keybd_event((byte)Keys.ShiftKey, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+
+            //keybd_event((byte)Keys.ShiftKey, 0, 0, UIntPtr.Zero);
+
+            // Simular clic derecho del mouse
+            //keybd_event((byte)Keys.ShiftKey, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
 
 
             //mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0); // Presionar el botón izquierdo
@@ -80,9 +109,24 @@ namespace AutoClickerByGerman
 
         private void StartAutoClicker()
         {
+            DateTime lastMouseClickTime = DateTime.Now;
+            DateTime lastKeyPressTime = DateTime.Now;
+
+            PressKey3();
+
+
             while (isAutoClickerRunning)
             {
                 DoMouseClick();
+
+
+                // Intervalo para la tecla '3' (cada 5 segundos)
+                if ((DateTime.Now - lastKeyPressTime).TotalMilliseconds >= 6000)
+                {
+                    PressKey3();
+                    lastKeyPressTime = DateTime.Now;
+                }
+
                 Thread.Sleep(clickInterval);
             }
         }
