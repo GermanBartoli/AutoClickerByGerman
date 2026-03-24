@@ -6,7 +6,7 @@
       "type": "dotnet",
       "request": "launch",
       "projectPath": "${workspaceFolder}/AutoClickerByGerman/AutoClickerByGerman.csproj",
-      "preLaunchTask": "compilar"
+      "preLaunchTask": "build"
     }
   ]
 }
