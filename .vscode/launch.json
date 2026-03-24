@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Iniciar AutoClickerByGerman",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/AutoClickerByGerman/AutoClickerByGerman.csproj",
+      "preLaunchTask": "compilar"
+    }
+  ]
+}
