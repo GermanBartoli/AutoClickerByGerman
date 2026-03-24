@@ -8,7 +8,7 @@ namespace AutoClickerByGerman
     public partial class Form1 : Form
     {
         // https://chatgpt.com/c/77c98c37-aa45-43a0-97a2-5c3ff0514bea
-        // Declaración de un objeto KeyboardHook
+        // Declaraciï¿½n de un objeto KeyboardHook
         private KeyboardHook keyboardHook;
 
         // Key teclado
@@ -40,13 +40,13 @@ namespace AutoClickerByGerman
         {
             InitializeComponent();
             keyboardHook = new KeyboardHook();
-            // Asociación del evento KeyPressed al método Form1_KeyPressed
+            // Asociaciï¿½n del evento KeyPressed al mï¿½todo Form1_KeyPressed
             keyboardHook.KeyPressed += Form1_KeyPressed;
         }
 
-        private const byte VK_2 = 0x32; // Código virtual para la tecla '2'
+        private const byte VK_2 = 0x32; // Cï¿½digo virtual para la tecla '2'
 
-        private const byte VK_3 = 0x33;               // Código virtual para la tecla '3'
+        private const byte VK_3 = 0x33;               // Cï¿½digo virtual para la tecla '3'
         private void PressKey3()
         {
             // Simular presionar la tecla '3'
@@ -63,18 +63,18 @@ namespace AutoClickerByGerman
         }
         private void DoMouseClick()
         {
-            //mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); // Presionar el botón izquierdo
+            //mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); // Presionar el botï¿½n izquierdo
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-            mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
+            mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); // Presionar el botï¿½n izquierdo
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-            mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
+            mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botï¿½n izquierdo
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
 
 
             //mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-            //mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
+            //mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botï¿½n izquierdo
 
             // Simular presionar la tecla Shift
             //keybd_event((byte)Keys.ShiftKey, 0, 0, UIntPtr.Zero);
@@ -88,8 +88,8 @@ namespace AutoClickerByGerman
             //keybd_event((byte)Keys.ShiftKey, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
 
 
-            //mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0); // Presionar el botón izquierdo
-            //mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botón izquierdo
+            //mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0); // Presionar el botï¿½n izquierdo
+            //mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); // Presionar el botï¿½n izquierdo
 
             //mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
             //keybd_event(VK_O, 0, KEYEVENTF_KEYDOWN, IntPtr.Zero);
@@ -97,7 +97,7 @@ namespace AutoClickerByGerman
 
         }
 
-        // Método que se llama cuando se detecta una pulsación de tecla
+        // Mï¿½todo que se llama cuando se detecta una pulsaciï¿½n de tecla
         private void Form1_KeyPressed(Keys key)
         {
             // Verifica si la tecla pulsada es la tecla '0'
@@ -133,7 +133,7 @@ namespace AutoClickerByGerman
 
         private void buttonStartStop_Click(object sender, EventArgs e)
         {
-            ToggleAutoClicker(); // Alternar el estado del autoclicker cuando se hace clic en el botón
+            ToggleAutoClicker(); // Alternar el estado del autoclicker cuando se hace clic en el botï¿½n
         }
 
         private void ToggleAutoClicker()

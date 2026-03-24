@@ -31,7 +31,6 @@
             btnStartStop = new Button();
             txtIntervaloClick = new TextBox();
             labelStatus = new Label();
-            button1 = new Button();
             SuspendLayout();
             // 
             // btnStartStop
@@ -60,22 +59,11 @@
             labelStatus.TabIndex = 2;
             labelStatus.Text = "label1";
             // 
-            // button1
-            // 
-            button1.Location = new Point(493, 349);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 23);
-            button1.TabIndex = 3;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click_1;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(button1);
             Controls.Add(labelStatus);
             Controls.Add(txtIntervaloClick);
             Controls.Add(btnStartStop);
@@ -90,6 +78,5 @@
         private Button btnStartStop;
         private TextBox txtIntervaloClick;
         private Label labelStatus;
-        private Button button1;
     }
 }
