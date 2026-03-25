@@ -64,8 +64,9 @@ namespace AutoClickerByGerman
         private const byte VK_4 = 0x34;
         private const byte VK_5 = 0x35;
 
-        private readonly byte[] secuenciaTeclas = { VK_1, VK_2, VK_3, VK_4, VK_5, VK_1, VK_1, VK_1, VK_1 };
-        private readonly int intervaloEntreTeclas = 1000;
+        private readonly byte[] secuenciaTeclas = { VK_1, VK_2, VK_3, VK_4, VK_5 };
+        private readonly int intervaloEntreTeclas = 1500;
+        private readonly int intervaloEntreCiclos = 1500;
 
         private Thread? hiloAutomatizacion;
         private bool automatizacionActiva;
@@ -152,8 +153,10 @@ namespace AutoClickerByGerman
         {
             while (automatizacionActiva)
             {
-                foreach (byte tecla in secuenciaTeclas)
+                for (int indice = 0; indice < secuenciaTeclas.Length; indice++)
                 {
+                    byte tecla = secuenciaTeclas[indice];
+
                     if (!automatizacionActiva)
                     {
                         return;
@@ -171,7 +174,10 @@ namespace AutoClickerByGerman
                         return;
                     }
 
-                    for (int espera = 0; espera < intervaloEntreTeclas / 100; espera++)
+                    bool esUltimaTeclaDelCiclo = indice == secuenciaTeclas.Length - 1;
+                    int pausa = esUltimaTeclaDelCiclo ? intervaloEntreCiclos : intervaloEntreTeclas;
+
+                    for (int espera = 0; espera < pausa / 100; espera++)
                     {
                         if (!automatizacionActiva)
                         {
