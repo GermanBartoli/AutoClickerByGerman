@@ -11,7 +11,22 @@ namespace AutoClickerByGerman
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MenuPrincipalForm());
+
+            while (true)
+            {
+                using var menuPrincipal = new MenuPrincipalForm();
+                menuPrincipal.ShowDialog();
+
+                if (menuPrincipal.FormularioSeleccionado is not Form formularioSeleccionado)
+                {
+                    break;
+                }
+
+                using (formularioSeleccionado)
+                {
+                    formularioSeleccionado.ShowDialog();
+                }
+            }
         }
     }
 }

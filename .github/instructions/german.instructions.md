@@ -6,6 +6,8 @@ priority: 100
 
 no hagas cambios de la logica en el archivo form1 porque lo uso para minecraft dungeons
 
+siempre que termines un cambio, compila el proyecto y haz pruebas para asegurarte de que todo funciona correctamente
+
 habla en español y a la auto generación de commits hazla en español
 
 no hagas el commit dejamelo a mí solo dime el mensaje

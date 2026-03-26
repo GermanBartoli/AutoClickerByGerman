@@ -6,6 +6,8 @@ namespace AutoClickerByGerman
 {
     public partial class MenuPrincipalForm : Form
     {
+        public Form? FormularioSeleccionado { get; private set; }
+
         public MenuPrincipalForm()
         {
             InitializeComponent();
@@ -13,14 +15,14 @@ namespace AutoClickerByGerman
 
         private void btnMinecraftDungeon_Click(object sender, EventArgs e)
         {
-            using var form = new Form1();
-            form.ShowDialog(this);
+            FormularioSeleccionado = new Form1();
+            Close();
         }
 
         private void btnAqw_Click(object sender, EventArgs e)
         {
-            using var form = new AqwForm();
-            form.ShowDialog(this);
+            FormularioSeleccionado = new AqwForm();
+            Close();
         }
     }
 }
