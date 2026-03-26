@@ -75,6 +75,7 @@ namespace AutoClickerByGerman
         {
             lblEstado.Text = "Estado: cambia a AQW (3s)...";
             btnCapturarVentana.Enabled = false;
+            WindowState = FormWindowState.Minimized;
 
             Thread hiloCaptura = new Thread(() =>
             {
@@ -83,6 +84,14 @@ namespace AutoClickerByGerman
 
                 BeginInvoke((MethodInvoker)delegate
                 {
+                    if (WindowState == FormWindowState.Minimized)
+                    {
+                        WindowState = FormWindowState.Normal;
+                    }
+
+                    Show();
+                    Activate();
+
                     btnCapturarVentana.Enabled = true;
 
                     if (ventanaActiva == IntPtr.Zero || ventanaActiva == Handle)
