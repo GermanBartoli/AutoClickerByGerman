@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -24,9 +23,6 @@ namespace AutoClickerByGerman
         private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
 
         [DllImport("user32.dll")]
-        private static extern bool EnumChildWindows(IntPtr hWndParent, EnumWindowsProc lpEnumFunc, IntPtr lParam);
-
-        [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("kernel32.dll")]
@@ -37,8 +33,6 @@ namespace AutoClickerByGerman
 
         [DllImport("user32.dll")]
         private static extern IntPtr GetFocus();
-
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
@@ -122,6 +116,12 @@ namespace AutoClickerByGerman
             AlternarAutomatizacion();
         }
 
+        private void btnVolver_Click(object sender, EventArgs e)
+        {
+            automatizacionActiva = false;
+            Close();
+        }
+
         private void AlternarAutomatizacion()
         {
             if (automatizacionActiva)
@@ -192,6 +192,11 @@ namespace AutoClickerByGerman
 
         private static bool PresionarTeclaEnVentana(IntPtr ventana, byte tecla)
         {
+            if (!IsWindow(ventana))
+            {
+                return false;
+            }
+
             if (IsIconic(ventana))
             {
                 ShowWindowAsync(ventana, SW_RESTORE);
@@ -202,37 +207,34 @@ namespace AutoClickerByGerman
             IntPtr lParamDown = (IntPtr)(1 | (scanCode << 16));
             IntPtr lParamUp = (IntPtr)(1 | (scanCode << 16) | (1u << 30) | (1u << 31));
 
-            List<IntPtr> destinos = ObtenerDestinosEntrada(ventana);
-            bool envioExitoso = false;
+            IntPtr destino = ObtenerDestinoEntrada(ventana);
 
-            foreach (IntPtr destino in destinos)
+            SendMessage(destino, WM_ACTIVATE, (IntPtr)WA_ACTIVE, IntPtr.Zero);
+            SendMessage(destino, WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+
+            bool keyDownOk = PostMessage(destino, WM_KEYDOWN, (IntPtr)tecla, lParamDown);
+            bool keyUpOk = PostMessage(destino, WM_KEYUP, (IntPtr)tecla, lParamUp);
+
+            if (keyDownOk && keyUpOk)
             {
-                SendMessage(destino, WM_ACTIVATE, (IntPtr)WA_ACTIVE, IntPtr.Zero);
-                SendMessage(destino, WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
-
-                bool keyDownOk = PostMessage(destino, WM_KEYDOWN, (IntPtr)tecla, lParamDown);
-                bool keyUpOk = PostMessage(destino, WM_KEYUP, (IntPtr)tecla, lParamUp);
-
-                envioExitoso = envioExitoso || (keyDownOk && keyUpOk);
+                return true;
             }
 
-            return envioExitoso;
+            if (destino != ventana)
+            {
+                SendMessage(ventana, WM_ACTIVATE, (IntPtr)WA_ACTIVE, IntPtr.Zero);
+                SendMessage(ventana, WM_SETFOCUS, IntPtr.Zero, IntPtr.Zero);
+
+                bool keyDownFallbackOk = PostMessage(ventana, WM_KEYDOWN, (IntPtr)tecla, lParamDown);
+                bool keyUpFallbackOk = PostMessage(ventana, WM_KEYUP, (IntPtr)tecla, lParamUp);
+                return keyDownFallbackOk && keyUpFallbackOk;
+            }
+
+            return false;
         }
 
-        private static List<IntPtr> ObtenerDestinosEntrada(IntPtr ventanaPrincipal)
+        private static IntPtr ObtenerDestinoEntrada(IntPtr ventanaPrincipal)
         {
-            List<IntPtr> destinos = new List<IntPtr> { ventanaPrincipal };
-
-            EnumChildWindows(ventanaPrincipal, (hijo, _) =>
-            {
-                if (!destinos.Contains(hijo))
-                {
-                    destinos.Add(hijo);
-                }
-
-                return true;
-            }, IntPtr.Zero);
-
             uint hiloObjetivo = GetWindowThreadProcessId(ventanaPrincipal, out _);
             uint hiloActual = GetCurrentThreadId();
             bool hilosAdjuntos = false;
@@ -242,9 +244,9 @@ namespace AutoClickerByGerman
                 hilosAdjuntos = AttachThreadInput(hiloActual, hiloObjetivo, true);
                 IntPtr focoObjetivo = GetFocus();
 
-                if (focoObjetivo != IntPtr.Zero && !destinos.Contains(focoObjetivo))
+                if (focoObjetivo != IntPtr.Zero && IsWindow(focoObjetivo))
                 {
-                    destinos.Add(focoObjetivo);
+                    return focoObjetivo;
                 }
             }
             finally
@@ -255,7 +257,7 @@ namespace AutoClickerByGerman
                 }
             }
 
-            return destinos;
+            return ventanaPrincipal;
         }
 
         private static string ObtenerTituloVentana(IntPtr ventana)

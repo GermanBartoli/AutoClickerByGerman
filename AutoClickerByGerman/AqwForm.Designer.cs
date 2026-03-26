@@ -22,6 +22,7 @@ namespace AutoClickerByGerman
             lblVentanaObjetivo = new Label();
             btnCapturarVentana = new Button();
             btnIniciarDetener = new Button();
+            btnVolver = new Button();
             SuspendLayout();
             // 
             // lblTitulo
@@ -87,12 +88,28 @@ namespace AutoClickerByGerman
             btnIniciarDetener.UseVisualStyleBackColor = false;
             btnIniciarDetener.Click += btnIniciarDetener_Click;
             // 
+            // btnVolver
+            // 
+            btnVolver.BackColor = Color.FromArgb(127, 140, 141);
+            btnVolver.FlatAppearance.BorderSize = 0;
+            btnVolver.FlatStyle = FlatStyle.Flat;
+            btnVolver.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnVolver.ForeColor = Color.White;
+            btnVolver.Location = new Point(120, 264);
+            btnVolver.Name = "btnVolver";
+            btnVolver.Size = new Size(160, 36);
+            btnVolver.TabIndex = 5;
+            btnVolver.Text = "Volver";
+            btnVolver.UseVisualStyleBackColor = false;
+            btnVolver.Click += btnVolver_Click;
+            // 
             // AqwForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(24, 26, 27);
-            ClientSize = new Size(400, 280);
+            ClientSize = new Size(400, 320);
+            Controls.Add(btnVolver);
             Controls.Add(btnIniciarDetener);
             Controls.Add(btnCapturarVentana);
             Controls.Add(lblVentanaObjetivo);
@@ -111,5 +128,6 @@ namespace AutoClickerByGerman
         private Label lblVentanaObjetivo;
         private Button btnCapturarVentana;
         private Button btnIniciarDetener;
+        private Button btnVolver;
     }
 }
