@@ -26,6 +26,11 @@ namespace AutoClickerByGerman
                 {
                     formularioSeleccionado.ShowDialog();
                 }
+
+                if (formularioSeleccionado is AqwForm)
+                {
+                    break;
+                }
             }
         }
     }

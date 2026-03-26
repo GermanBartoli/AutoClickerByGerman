@@ -20,6 +20,8 @@ namespace AutoClickerByGerman
             lblTitulo = new Label();
             lblEstado = new Label();
             lblVentanaObjetivo = new Label();
+            chkAutoatack = new CheckBox();
+            chkVhl = new CheckBox();
             btnCapturarVentana = new Button();
             btnIniciarDetener = new Button();
             btnVolver = new Button();
@@ -58,6 +60,34 @@ namespace AutoClickerByGerman
             lblVentanaObjetivo.Text = "Ventana objetivo: no seleccionada";
             lblVentanaObjetivo.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // chkAutoatack
+            // 
+            chkAutoatack.AutoSize = true;
+            chkAutoatack.Checked = true;
+            chkAutoatack.CheckState = CheckState.Checked;
+            chkAutoatack.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            chkAutoatack.ForeColor = Color.White;
+            chkAutoatack.Location = new Point(92, 155);
+            chkAutoatack.Name = "chkAutoatack";
+            chkAutoatack.Size = new Size(87, 19);
+            chkAutoatack.TabIndex = 3;
+            chkAutoatack.Text = "Autoatack";
+            chkAutoatack.UseVisualStyleBackColor = true;
+            chkAutoatack.CheckedChanged += chkAutoatack_CheckedChanged;
+            // 
+            // chkVhl
+            // 
+            chkVhl.AutoSize = true;
+            chkVhl.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            chkVhl.ForeColor = Color.White;
+            chkVhl.Location = new Point(225, 155);
+            chkVhl.Name = "chkVhl";
+            chkVhl.Size = new Size(47, 19);
+            chkVhl.TabIndex = 4;
+            chkVhl.Text = "VHL";
+            chkVhl.UseVisualStyleBackColor = true;
+            chkVhl.CheckedChanged += chkVhl_CheckedChanged;
+            // 
             // btnCapturarVentana
             // 
             btnCapturarVentana.BackColor = Color.FromArgb(231, 76, 60);
@@ -65,10 +95,10 @@ namespace AutoClickerByGerman
             btnCapturarVentana.FlatStyle = FlatStyle.Flat;
             btnCapturarVentana.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             btnCapturarVentana.ForeColor = Color.White;
-            btnCapturarVentana.Location = new Point(92, 160);
+            btnCapturarVentana.Location = new Point(92, 184);
             btnCapturarVentana.Name = "btnCapturarVentana";
             btnCapturarVentana.Size = new Size(216, 38);
-            btnCapturarVentana.TabIndex = 3;
+            btnCapturarVentana.TabIndex = 5;
             btnCapturarVentana.Text = "Capturar ventana (3s)";
             btnCapturarVentana.UseVisualStyleBackColor = false;
             btnCapturarVentana.Click += btnCapturarVentana_Click;
@@ -80,10 +110,10 @@ namespace AutoClickerByGerman
             btnIniciarDetener.FlatStyle = FlatStyle.Flat;
             btnIniciarDetener.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
             btnIniciarDetener.ForeColor = Color.White;
-            btnIniciarDetener.Location = new Point(120, 208);
+            btnIniciarDetener.Location = new Point(120, 232);
             btnIniciarDetener.Name = "btnIniciarDetener";
             btnIniciarDetener.Size = new Size(160, 48);
-            btnIniciarDetener.TabIndex = 4;
+            btnIniciarDetener.TabIndex = 6;
             btnIniciarDetener.Text = "Iniciar";
             btnIniciarDetener.UseVisualStyleBackColor = false;
             btnIniciarDetener.Click += btnIniciarDetener_Click;
@@ -95,10 +125,10 @@ namespace AutoClickerByGerman
             btnVolver.FlatStyle = FlatStyle.Flat;
             btnVolver.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             btnVolver.ForeColor = Color.White;
-            btnVolver.Location = new Point(120, 264);
+            btnVolver.Location = new Point(120, 288);
             btnVolver.Name = "btnVolver";
             btnVolver.Size = new Size(160, 36);
-            btnVolver.TabIndex = 5;
+            btnVolver.TabIndex = 7;
             btnVolver.Text = "Volver";
             btnVolver.UseVisualStyleBackColor = false;
             btnVolver.Click += btnVolver_Click;
@@ -108,10 +138,12 @@ namespace AutoClickerByGerman
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(24, 26, 27);
-            ClientSize = new Size(400, 320);
+            ClientSize = new Size(400, 340);
             Controls.Add(btnVolver);
             Controls.Add(btnIniciarDetener);
             Controls.Add(btnCapturarVentana);
+            Controls.Add(chkVhl);
+            Controls.Add(chkAutoatack);
             Controls.Add(lblVentanaObjetivo);
             Controls.Add(lblEstado);
             Controls.Add(lblTitulo);
@@ -126,6 +158,8 @@ namespace AutoClickerByGerman
         private Label lblTitulo;
         private Label lblEstado;
         private Label lblVentanaObjetivo;
+        private CheckBox chkAutoatack;
+        private CheckBox chkVhl;
         private Button btnCapturarVentana;
         private Button btnIniciarDetener;
         private Button btnVolver;

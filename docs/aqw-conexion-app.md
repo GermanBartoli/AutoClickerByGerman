@@ -37,12 +37,33 @@ Para WM_KEYDOWN y WM_KEYUP se arma lParam con:
 Esto hace que el mensaje se parezca a un evento real de teclado.
 
 ## Ciclo de automatizacion
-- Estado ejecutando: while con la secuencia.
-- Pausa entre teclas: 1000 ms.
+- Estado ejecutando: while en segundo plano que agenda teclas por modo.
+- Separacion minima global entre teclas: 1000 ms para evitar choques.
 - Detencion:
   - Boton Detener.
   - Cierre del formulario.
   - Ventana objetivo invalida.
+
+## Modos disponibles
+
+### Autoatack
+- Se activa con el checkbox Autoatack.
+- Mantiene la logica actual de secuencia 1, 2, 3, 4, 5.
+- Respeta el intervalo configurado en codigo entre teclas y entre ciclos.
+
+### VHL
+- Se activa con el checkbox VHL.
+- Ejecuta la clase con teclas y cooldown independiente:
+  - Tecla 2: 3 segundos.
+  - Tecla 3: 4 segundos.
+  - Tecla 4: 3 segundos.
+  - Tecla 5: 10 segundos.
+- Cada tecla se vuelve a enviar apenas termina su cooldown, siempre que se cumpla la separacion minima global de 1 segundo.
+
+### Autoatack + VHL al mismo tiempo
+- Se pueden activar ambos checks.
+- El scheduler evita enviar dos teclas pegadas y mantiene la separacion minima.
+- Si una tecla ya cumplio cooldown, queda lista y se envia en el siguiente hueco disponible.
 
 ## Ventajas de este enfoque
 - No obliga a mantener AQW en foco.

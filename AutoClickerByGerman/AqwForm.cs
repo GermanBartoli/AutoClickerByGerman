@@ -58,17 +58,37 @@ namespace AutoClickerByGerman
         private const byte VK_4 = 0x34;
         private const byte VK_5 = 0x35;
 
-        private readonly byte[] secuenciaTeclas = { VK_1, VK_2, VK_3, VK_4, VK_5 };
-        private readonly int intervaloEntreTeclas = 1500;
-        private readonly int intervaloEntreCiclos = 1500;
+        private readonly byte[] secuenciaAutoatack = { VK_1, VK_2, VK_3, VK_4, VK_5 };
+        private readonly int intervaloAutoatackEntreTeclas = 1500;
+        private readonly int intervaloAutoatackEntreCiclos = 1500;
+        private readonly byte[] secuenciaVhl = { VK_2, VK_3, VK_4, VK_5 };
+        private readonly int[] cooldownsVhlMs = { 3000, 4000, 3000, 10000 };
+        private readonly int intervaloMinimoGlobalMs = 1000;
 
         private Thread? hiloAutomatizacion;
         private bool automatizacionActiva;
         private IntPtr ventanaObjetivo = IntPtr.Zero;
+        private readonly object syncProgramacion = new object();
+
+        private bool autoatackHabilitado;
+        private bool vhlHabilitado;
+        private int indiceAutoatackActual;
+        private DateTime proximoAutoatackUtc = DateTime.MinValue;
+        private readonly DateTime[] proximosVhlUtc = new DateTime[4];
+        private DateTime proximoEnvioGlobalUtc = DateTime.MinValue;
+
+        private enum ModoDisparo
+        {
+            Ninguno,
+            Autoatack,
+            Vhl
+        }
 
         public AqwForm()
         {
             InitializeComponent();
+            autoatackHabilitado = chkAutoatack.Checked;
+            vhlHabilitado = chkVhl.Checked;
         }
 
         private void btnCapturarVentana_Click(object sender, EventArgs e)
@@ -131,6 +151,38 @@ namespace AutoClickerByGerman
             Close();
         }
 
+        private void chkAutoatack_CheckedChanged(object sender, EventArgs e)
+        {
+            lock (syncProgramacion)
+            {
+                autoatackHabilitado = chkAutoatack.Checked;
+
+                if (autoatackHabilitado)
+                {
+                    indiceAutoatackActual = 0;
+                    proximoAutoatackUtc = DateTime.UtcNow;
+                }
+            }
+        }
+
+        private void chkVhl_CheckedChanged(object sender, EventArgs e)
+        {
+            lock (syncProgramacion)
+            {
+                vhlHabilitado = chkVhl.Checked;
+
+                if (vhlHabilitado)
+                {
+                    DateTime ahoraUtc = DateTime.UtcNow;
+
+                    for (int i = 0; i < proximosVhlUtc.Length; i++)
+                    {
+                        proximosVhlUtc[i] = ahoraUtc;
+                    }
+                }
+            }
+        }
+
         private void AlternarAutomatizacion()
         {
             if (automatizacionActiva)
@@ -147,56 +199,186 @@ namespace AutoClickerByGerman
                 return;
             }
 
+            lock (syncProgramacion)
+            {
+                if (!autoatackHabilitado && !vhlHabilitado)
+                {
+                    MessageBox.Show(this, "Activa al menos un modo: Autoatack o VHL.", "AQW", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                ReiniciarProgramacion();
+            }
+
             automatizacionActiva = true;
             btnIniciarDetener.Text = "Detener";
             lblEstado.Text = "Estado: ejecutando";
 
-            hiloAutomatizacion = new Thread(EjecutarSecuenciaTeclas)
+            hiloAutomatizacion = new Thread(EjecutarAutomatizacion)
             {
                 IsBackground = true
             };
             hiloAutomatizacion.Start();
         }
 
-        private void EjecutarSecuenciaTeclas()
+        private void ReiniciarProgramacion()
+        {
+            DateTime ahoraUtc = DateTime.UtcNow;
+            indiceAutoatackActual = 0;
+            proximoAutoatackUtc = ahoraUtc;
+            proximoEnvioGlobalUtc = ahoraUtc;
+
+            for (int i = 0; i < proximosVhlUtc.Length; i++)
+            {
+                proximosVhlUtc[i] = ahoraUtc;
+            }
+        }
+
+        private void EjecutarAutomatizacion()
         {
             while (automatizacionActiva)
             {
-                for (int indice = 0; indice < secuenciaTeclas.Length; indice++)
+                if (!IsWindow(ventanaObjetivo))
                 {
-                    byte tecla = secuenciaTeclas[indice];
+                    BeginInvoke((MethodInvoker)delegate
+                    {
+                        automatizacionActiva = false;
+                        btnIniciarDetener.Text = "Iniciar";
+                        lblEstado.Text = "Estado: detenido";
+                        MessageBox.Show(this, "La ventana objetivo ya no está disponible.", "AQW", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    });
+                    return;
+                }
 
-                    if (!automatizacionActiva)
+                if (!IntentarSeleccionarTecla(out byte tecla, out ModoDisparo modo, out int indiceVhl, out int esperaMs))
+                {
+                    if (!EsperarConCancelacion(esperaMs))
                     {
                         return;
                     }
 
-                    if (!PresionarTeclaEnVentana(ventanaObjetivo, tecla))
+                    continue;
+                }
+
+                if (!PresionarTeclaEnVentana(ventanaObjetivo, tecla))
+                {
+                    BeginInvoke((MethodInvoker)delegate
                     {
-                        BeginInvoke((MethodInvoker)delegate
-                        {
-                            automatizacionActiva = false;
-                            btnIniciarDetener.Text = "Iniciar";
-                            lblEstado.Text = "Estado: detenido";
-                            MessageBox.Show(this, "La ventana objetivo ya no está disponible.", "AQW", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        });
-                        return;
+                        automatizacionActiva = false;
+                        btnIniciarDetener.Text = "Iniciar";
+                        lblEstado.Text = "Estado: detenido";
+                        MessageBox.Show(this, "La ventana objetivo ya no está disponible.", "AQW", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    });
+                    return;
+                }
+
+                DateTime enviadoUtc = DateTime.UtcNow;
+
+                lock (syncProgramacion)
+                {
+                    proximoEnvioGlobalUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
+
+                    if (modo == ModoDisparo.Autoatack && autoatackHabilitado)
+                    {
+                        AvanzarAutoatack(enviadoUtc);
                     }
 
-                    bool esUltimaTeclaDelCiclo = indice == secuenciaTeclas.Length - 1;
-                    int pausa = esUltimaTeclaDelCiclo ? intervaloEntreCiclos : intervaloEntreTeclas;
-
-                    for (int espera = 0; espera < pausa / 100; espera++)
+                    if (modo == ModoDisparo.Vhl && indiceVhl >= 0 && indiceVhl < proximosVhlUtc.Length && vhlHabilitado)
                     {
-                        if (!automatizacionActiva)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(100);
+                        proximosVhlUtc[indiceVhl] = enviadoUtc.AddMilliseconds(cooldownsVhlMs[indiceVhl]);
                     }
                 }
             }
+        }
+
+        private bool IntentarSeleccionarTecla(out byte tecla, out ModoDisparo modo, out int indiceVhl, out int esperaMs)
+        {
+            DateTime ahoraUtc = DateTime.UtcNow;
+            DateTime proximaRevisionUtc = DateTime.MaxValue;
+
+            tecla = 0;
+            modo = ModoDisparo.Ninguno;
+            indiceVhl = -1;
+
+            lock (syncProgramacion)
+            {
+                if (!autoatackHabilitado && !vhlHabilitado)
+                {
+                    esperaMs = 150;
+                    return false;
+                }
+
+                if (proximoEnvioGlobalUtc > ahoraUtc)
+                {
+                    esperaMs = (int)Math.Max(20, Math.Min(200, (proximoEnvioGlobalUtc - ahoraUtc).TotalMilliseconds));
+                    return false;
+                }
+
+                if (autoatackHabilitado)
+                {
+                    if (proximoAutoatackUtc <= ahoraUtc)
+                    {
+                        tecla = secuenciaAutoatack[indiceAutoatackActual];
+                        modo = ModoDisparo.Autoatack;
+                        esperaMs = 20;
+                        return true;
+                    }
+
+                    proximaRevisionUtc = proximoAutoatackUtc;
+                }
+
+                if (vhlHabilitado)
+                {
+                    for (int i = 0; i < proximosVhlUtc.Length; i++)
+                    {
+                        if (proximosVhlUtc[i] <= ahoraUtc)
+                        {
+                            tecla = secuenciaVhl[i];
+                            modo = ModoDisparo.Vhl;
+                            indiceVhl = i;
+                            esperaMs = 20;
+                            return true;
+                        }
+
+                        if (proximosVhlUtc[i] < proximaRevisionUtc)
+                        {
+                            proximaRevisionUtc = proximosVhlUtc[i];
+                        }
+                    }
+                }
+            }
+
+            if (proximaRevisionUtc == DateTime.MaxValue)
+            {
+                esperaMs = 100;
+                return false;
+            }
+
+            esperaMs = (int)Math.Max(20, Math.Min(200, (proximaRevisionUtc - ahoraUtc).TotalMilliseconds));
+            return false;
+        }
+
+        private void AvanzarAutoatack(DateTime enviadoUtc)
+        {
+            bool esUltimaTecla = indiceAutoatackActual == secuenciaAutoatack.Length - 1;
+            int pausaMs = esUltimaTecla ? intervaloAutoatackEntreCiclos : intervaloAutoatackEntreTeclas;
+
+            indiceAutoatackActual = (indiceAutoatackActual + 1) % secuenciaAutoatack.Length;
+            proximoAutoatackUtc = enviadoUtc.AddMilliseconds(pausaMs);
+        }
+
+        private bool EsperarConCancelacion(int esperaMs)
+        {
+            int restante = Math.Max(20, esperaMs);
+
+            while (automatizacionActiva && restante > 0)
+            {
+                int tramo = Math.Min(100, restante);
+                Thread.Sleep(tramo);
+                restante -= tramo;
+            }
+
+            return automatizacionActiva;
         }
 
         private static bool PresionarTeclaEnVentana(IntPtr ventana, byte tecla)
