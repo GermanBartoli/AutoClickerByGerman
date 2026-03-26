@@ -28,7 +28,7 @@ namespace AutoClickerByGerman
             // 
             tituloPrincipal.Dock = DockStyle.Top;
             tituloPrincipal.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
-            tituloPrincipal.ForeColor = Color.White;
+            tituloPrincipal.ForeColor = Color.FromArgb(15, 23, 42);
             tituloPrincipal.Location = new Point(0, 0);
             tituloPrincipal.Name = "tituloPrincipal";
             tituloPrincipal.Size = new Size(520, 80);
@@ -38,8 +38,9 @@ namespace AutoClickerByGerman
             // 
             // btnMinecraftDungeon
             // 
-            btnMinecraftDungeon.BackColor = Color.FromArgb(46, 204, 113);
+            btnMinecraftDungeon.BackColor = Color.FromArgb(34, 197, 94);
             btnMinecraftDungeon.FlatAppearance.BorderSize = 0;
+            btnMinecraftDungeon.FlatAppearance.MouseOverBackColor = Color.FromArgb(22, 163, 74);
             btnMinecraftDungeon.FlatStyle = FlatStyle.Flat;
             btnMinecraftDungeon.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
             btnMinecraftDungeon.ForeColor = Color.White;
@@ -53,8 +54,9 @@ namespace AutoClickerByGerman
             // 
             // btnAqw
             // 
-            btnAqw.BackColor = Color.FromArgb(52, 152, 219);
+            btnAqw.BackColor = Color.FromArgb(37, 99, 235);
             btnAqw.FlatAppearance.BorderSize = 0;
+            btnAqw.FlatAppearance.MouseOverBackColor = Color.FromArgb(29, 78, 216);
             btnAqw.FlatStyle = FlatStyle.Flat;
             btnAqw.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
             btnAqw.ForeColor = Color.White;
@@ -68,7 +70,7 @@ namespace AutoClickerByGerman
             // 
             // panelContenedor
             // 
-            panelContenedor.BackColor = Color.FromArgb(32, 34, 37);
+            panelContenedor.BackColor = Color.FromArgb(248, 250, 252);
             panelContenedor.Controls.Add(btnAqw);
             panelContenedor.Controls.Add(btnMinecraftDungeon);
             panelContenedor.Controls.Add(tituloPrincipal);
@@ -82,7 +84,7 @@ namespace AutoClickerByGerman
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(24, 26, 27);
+            BackColor = Color.FromArgb(226, 232, 240);
             ClientSize = new Size(520, 310);
             Controls.Add(panelContenedor);
             FormBorderStyle = FormBorderStyle.FixedSingle;

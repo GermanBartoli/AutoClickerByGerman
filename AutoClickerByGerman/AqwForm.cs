@@ -7,6 +7,8 @@ namespace AutoClickerByGerman
 {
     public partial class AqwForm : Form
     {
+        public bool VolverAlMenuSolicitado { get; private set; }
+
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
@@ -61,8 +63,10 @@ namespace AutoClickerByGerman
         private readonly byte[] secuenciaAutoatack = { VK_1, VK_2, VK_3, VK_4, VK_5 };
         private readonly int intervaloAutoatackEntreTeclas = 1500;
         private readonly int intervaloAutoatackEntreCiclos = 1500;
-        private readonly byte[] secuenciaVhl = { VK_2, VK_3, VK_4, VK_5 };
-        private readonly int[] cooldownsVhlMs = { 3000, 4000, 3000, 10000 };
+        private readonly byte[] secuenciaVhl = { VK_2, VK_3, VK_4, VK_5, VK_1 };
+        private readonly int[] cooldownsVhlMs = { 3000, 4000, 3000, 10000, 7000 };
+        private readonly byte[] secuenciaRevenant = { VK_2, VK_3, VK_4, VK_5, VK_1 };
+        private readonly int[] cooldownsRevenantMs = { 3000, 4000, 3000, 10000, 7000 };
         private readonly int intervaloMinimoGlobalMs = 1000;
 
         private Thread? hiloAutomatizacion;
@@ -72,16 +76,19 @@ namespace AutoClickerByGerman
 
         private bool autoatackHabilitado;
         private bool vhlHabilitado;
+        private bool revenantHabilitado;
         private int indiceAutoatackActual;
         private DateTime proximoAutoatackUtc = DateTime.MinValue;
-        private readonly DateTime[] proximosVhlUtc = new DateTime[4];
+        private readonly DateTime[] proximosVhlUtc = new DateTime[5];
+        private readonly DateTime[] proximosRevenantUtc = new DateTime[5];
         private DateTime proximoEnvioGlobalUtc = DateTime.MinValue;
 
         private enum ModoDisparo
         {
             Ninguno,
             Autoatack,
-            Vhl
+            Vhl,
+            Revenant
         }
 
         public AqwForm()
@@ -89,6 +96,7 @@ namespace AutoClickerByGerman
             InitializeComponent();
             autoatackHabilitado = chkAutoatack.Checked;
             vhlHabilitado = chkVhl.Checked;
+            revenantHabilitado = chkRevenant.Checked;
         }
 
         private void btnCapturarVentana_Click(object sender, EventArgs e)
@@ -148,6 +156,7 @@ namespace AutoClickerByGerman
         private void btnVolver_Click(object sender, EventArgs e)
         {
             automatizacionActiva = false;
+            VolverAlMenuSolicitado = true;
             Close();
         }
 
@@ -183,6 +192,24 @@ namespace AutoClickerByGerman
             }
         }
 
+        private void chkRevenant_CheckedChanged(object sender, EventArgs e)
+        {
+            lock (syncProgramacion)
+            {
+                revenantHabilitado = chkRevenant.Checked;
+
+                if (revenantHabilitado)
+                {
+                    DateTime ahoraUtc = DateTime.UtcNow;
+
+                    for (int i = 0; i < proximosRevenantUtc.Length; i++)
+                    {
+                        proximosRevenantUtc[i] = ahoraUtc;
+                    }
+                }
+            }
+        }
+
         private void AlternarAutomatizacion()
         {
             if (automatizacionActiva)
@@ -201,9 +228,9 @@ namespace AutoClickerByGerman
 
             lock (syncProgramacion)
             {
-                if (!autoatackHabilitado && !vhlHabilitado)
+                if (!autoatackHabilitado && !vhlHabilitado && !revenantHabilitado)
                 {
-                    MessageBox.Show(this, "Activa al menos un modo: Autoatack o VHL.", "AQW", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(this, "Activa al menos un modo: Autoatack, VHL o Revenant.", "AQW", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -231,6 +258,11 @@ namespace AutoClickerByGerman
             for (int i = 0; i < proximosVhlUtc.Length; i++)
             {
                 proximosVhlUtc[i] = ahoraUtc;
+            }
+
+            for (int i = 0; i < proximosRevenantUtc.Length; i++)
+            {
+                proximosRevenantUtc[i] = ahoraUtc;
             }
         }
 
@@ -287,6 +319,11 @@ namespace AutoClickerByGerman
                     {
                         proximosVhlUtc[indiceVhl] = enviadoUtc.AddMilliseconds(cooldownsVhlMs[indiceVhl]);
                     }
+
+                    if (modo == ModoDisparo.Revenant && indiceVhl >= 0 && indiceVhl < proximosRevenantUtc.Length && revenantHabilitado)
+                    {
+                        proximosRevenantUtc[indiceVhl] = enviadoUtc.AddMilliseconds(cooldownsRevenantMs[indiceVhl]);
+                    }
                 }
             }
         }
@@ -302,7 +339,7 @@ namespace AutoClickerByGerman
 
             lock (syncProgramacion)
             {
-                if (!autoatackHabilitado && !vhlHabilitado)
+                if (!autoatackHabilitado && !vhlHabilitado && !revenantHabilitado)
                 {
                     esperaMs = 150;
                     return false;
@@ -343,6 +380,26 @@ namespace AutoClickerByGerman
                         if (proximosVhlUtc[i] < proximaRevisionUtc)
                         {
                             proximaRevisionUtc = proximosVhlUtc[i];
+                        }
+                    }
+                }
+
+                if (revenantHabilitado)
+                {
+                    for (int i = 0; i < proximosRevenantUtc.Length; i++)
+                    {
+                        if (proximosRevenantUtc[i] <= ahoraUtc)
+                        {
+                            tecla = secuenciaRevenant[i];
+                            modo = ModoDisparo.Revenant;
+                            indiceVhl = i;
+                            esperaMs = 20;
+                            return true;
+                        }
+
+                        if (proximosRevenantUtc[i] < proximaRevisionUtc)
+                        {
+                            proximaRevisionUtc = proximosRevenantUtc[i];
                         }
                     }
                 }
