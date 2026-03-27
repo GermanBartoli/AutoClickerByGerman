@@ -66,7 +66,7 @@ namespace AutoClickerByGerman
         private readonly byte[] secuenciaVhl = { VK_2, VK_3, VK_4, VK_5, VK_1 };
         private readonly int[] cooldownsVhlMs = { 3000, 4000, 3000, 10000, 7000 };
         private readonly byte[] secuenciaRevenant = { VK_2, VK_3, VK_4, VK_5, VK_1 };
-        private readonly int[] cooldownsRevenantMs = { 3000, 4000, 3000, 10000, 7000 };
+        private readonly int[] cooldownsRevenantMs = { 4000, 4000, 5000, 7000, 10000 };
         private readonly int intervaloMinimoGlobalMs = 1000;
 
         private Thread? hiloAutomatizacion;
