@@ -32,7 +32,7 @@ namespace AutoClickerByGerman
 
 
 
-        private Thread autoClickerThread;
+    private Thread? autoClickerThread;
         private bool isAutoClickerRunning = false;
         private int clickInterval;
 
@@ -141,7 +141,7 @@ namespace AutoClickerByGerman
             if (isAutoClickerRunning)
             {
                 isAutoClickerRunning = false;
-                autoClickerThread.Join();
+                autoClickerThread?.Join();
                 btnStartStop.Text = "Start";
                 labelStatus.Text = "AutoClicker stopped.";
             }

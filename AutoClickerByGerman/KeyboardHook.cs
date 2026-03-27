@@ -14,7 +14,7 @@ namespace AutoClickerByGerman
         //https://chatgpt.com/c/0189cbd4-82b5-4466-89ed-f8b65edc6954
         // Declaración de los delegados de eventos de teclado
         public delegate int KeyboardHookProc(int nCode, int wParam, IntPtr lParam);
-        private static KeyboardHookProc hookProc;
+        private readonly KeyboardHookProc hookProc;
 
         // Importación de las funciones de la librería user32.dll
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -36,7 +36,7 @@ namespace AutoClickerByGerman
 
         // Delegado para el evento de tecla pulsada
         public delegate void KeyPressedEventHandler(Keys key);
-        public event KeyPressedEventHandler KeyPressed;
+        public event KeyPressedEventHandler? KeyPressed;
 
         private IntPtr hookId = IntPtr.Zero;
 
@@ -51,8 +51,13 @@ namespace AutoClickerByGerman
         private IntPtr SetHook(KeyboardHookProc hookProc)
         {
             using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
             {
+                using ProcessModule? curModule = curProcess.MainModule;
+                if (curModule is null)
+                {
+                    return IntPtr.Zero;
+                }
+
                 return SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, GetModuleHandle(curModule.ModuleName), 0);
             }
         }
