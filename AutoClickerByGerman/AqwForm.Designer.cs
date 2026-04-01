@@ -23,6 +23,7 @@ namespace AutoClickerByGerman
             chkAutoatack = new CheckBox();
             chkVhl = new CheckBox();
             chkRevenant = new CheckBox();
+            chkYami = new CheckBox();
             btnCapturarVentana = new Button();
             btnIniciarDetener = new Button();
             btnVolver = new Button();
@@ -67,10 +68,9 @@ namespace AutoClickerByGerman
             // chkAutoatack
             // 
             chkAutoatack.AutoSize = true;
-            chkAutoatack.Checked = true;
-            chkAutoatack.CheckState = CheckState.Checked;
+            chkAutoatack.Enabled = false;
             chkAutoatack.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            chkAutoatack.ForeColor = Color.FromArgb(31, 41, 55);
+            chkAutoatack.ForeColor = Color.Gray;
             chkAutoatack.Location = new Point(92, 155);
             chkAutoatack.Name = "chkAutoatack";
             chkAutoatack.Size = new Size(87, 19);
@@ -95,15 +95,30 @@ namespace AutoClickerByGerman
             // chkRevenant
             // 
             chkRevenant.AutoSize = true;
+            chkRevenant.Checked = true;
+            chkRevenant.CheckState = CheckState.Checked;
             chkRevenant.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             chkRevenant.ForeColor = Color.FromArgb(31, 41, 55);
-            chkRevenant.Location = new Point(157, 178);
+            chkRevenant.Location = new Point(114, 178);
             chkRevenant.Name = "chkRevenant";
             chkRevenant.Size = new Size(83, 19);
             chkRevenant.TabIndex = 5;
             chkRevenant.Text = "Revenant";
             chkRevenant.UseVisualStyleBackColor = true;
             chkRevenant.CheckedChanged += chkRevenant_CheckedChanged;
+            // 
+            // chkYami
+            // 
+            chkYami.AutoSize = true;
+            chkYami.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            chkYami.ForeColor = Color.FromArgb(31, 41, 55);
+            chkYami.Location = new Point(225, 178);
+            chkYami.Name = "chkYami";
+            chkYami.Size = new Size(53, 19);
+            chkYami.TabIndex = 6;
+            chkYami.Text = "Yami";
+            chkYami.UseVisualStyleBackColor = true;
+            chkYami.CheckedChanged += chkYami_CheckedChanged;
             // 
             // btnCapturarVentana
             // 
@@ -116,7 +131,7 @@ namespace AutoClickerByGerman
             btnCapturarVentana.Location = new Point(92, 208);
             btnCapturarVentana.Name = "btnCapturarVentana";
             btnCapturarVentana.Size = new Size(216, 38);
-            btnCapturarVentana.TabIndex = 6;
+            btnCapturarVentana.TabIndex = 7;
             btnCapturarVentana.Text = "Capturar ventana (3s)";
             btnCapturarVentana.UseVisualStyleBackColor = false;
             btnCapturarVentana.Click += btnCapturarVentana_Click;
@@ -132,7 +147,7 @@ namespace AutoClickerByGerman
             btnIniciarDetener.Location = new Point(120, 256);
             btnIniciarDetener.Name = "btnIniciarDetener";
             btnIniciarDetener.Size = new Size(160, 48);
-            btnIniciarDetener.TabIndex = 7;
+            btnIniciarDetener.TabIndex = 8;
             btnIniciarDetener.Text = "Iniciar";
             btnIniciarDetener.UseVisualStyleBackColor = false;
             btnIniciarDetener.Click += btnIniciarDetener_Click;
@@ -148,7 +163,7 @@ namespace AutoClickerByGerman
             btnVolver.Location = new Point(120, 312);
             btnVolver.Name = "btnVolver";
             btnVolver.Size = new Size(160, 36);
-            btnVolver.TabIndex = 8;
+            btnVolver.TabIndex = 9;
             btnVolver.Text = "Volver";
             btnVolver.UseVisualStyleBackColor = false;
             btnVolver.Click += btnVolver_Click;
@@ -162,6 +177,7 @@ namespace AutoClickerByGerman
             Controls.Add(btnVolver);
             Controls.Add(btnIniciarDetener);
             Controls.Add(btnCapturarVentana);
+            Controls.Add(chkYami);
             Controls.Add(chkRevenant);
             Controls.Add(chkVhl);
             Controls.Add(chkAutoatack);
@@ -182,6 +198,7 @@ namespace AutoClickerByGerman
         private CheckBox chkAutoatack;
         private CheckBox chkVhl;
         private CheckBox chkRevenant;
+        private CheckBox chkYami;
         private Button btnCapturarVentana;
         private Button btnIniciarDetener;
         private Button btnVolver;
