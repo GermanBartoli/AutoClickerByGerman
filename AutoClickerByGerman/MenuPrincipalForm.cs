@@ -24,5 +24,11 @@ namespace AutoClickerByGerman
             FormularioSeleccionado = new AqwForm();
             Close();
         }
+
+        private void btnAutoClickerNormal_Click(object sender, EventArgs e)
+        {
+            FormularioSeleccionado = new AutoClickerNormalForm();
+            Close();
+        }
     }
 }

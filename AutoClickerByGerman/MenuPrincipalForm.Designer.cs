@@ -20,6 +20,7 @@ namespace AutoClickerByGerman
             tituloPrincipal = new Label();
             btnMinecraftDungeon = new Button();
             btnAqw = new Button();
+            btnAutoClickerNormal = new Button();
             panelContenedor = new Panel();
             panelContenedor.SuspendLayout();
             SuspendLayout();
@@ -68,16 +69,33 @@ namespace AutoClickerByGerman
             btnAqw.UseVisualStyleBackColor = false;
             btnAqw.Click += btnAqw_Click;
             // 
+            // btnAutoClickerNormal
+            // 
+            btnAutoClickerNormal.BackColor = Color.FromArgb(217, 119, 6);
+            btnAutoClickerNormal.FlatAppearance.BorderSize = 0;
+            btnAutoClickerNormal.FlatAppearance.MouseOverBackColor = Color.FromArgb(180, 83, 9);
+            btnAutoClickerNormal.FlatStyle = FlatStyle.Flat;
+            btnAutoClickerNormal.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            btnAutoClickerNormal.ForeColor = Color.White;
+            btnAutoClickerNormal.Location = new Point(110, 255);
+            btnAutoClickerNormal.Name = "btnAutoClickerNormal";
+            btnAutoClickerNormal.Size = new Size(300, 52);
+            btnAutoClickerNormal.TabIndex = 3;
+            btnAutoClickerNormal.Text = "AutoClicker normal";
+            btnAutoClickerNormal.UseVisualStyleBackColor = false;
+            btnAutoClickerNormal.Click += btnAutoClickerNormal_Click;
+            // 
             // panelContenedor
             // 
             panelContenedor.BackColor = Color.FromArgb(248, 250, 252);
+            panelContenedor.Controls.Add(btnAutoClickerNormal);
             panelContenedor.Controls.Add(btnAqw);
             panelContenedor.Controls.Add(btnMinecraftDungeon);
             panelContenedor.Controls.Add(tituloPrincipal);
             panelContenedor.Dock = DockStyle.Fill;
             panelContenedor.Location = new Point(0, 0);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(520, 310);
+            panelContenedor.Size = new Size(520, 380);
             panelContenedor.TabIndex = 3;
             // 
             // MenuPrincipalForm
@@ -85,7 +103,7 @@ namespace AutoClickerByGerman
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(226, 232, 240);
-            ClientSize = new Size(520, 310);
+            ClientSize = new Size(520, 380);
             Controls.Add(panelContenedor);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
@@ -102,6 +120,7 @@ namespace AutoClickerByGerman
         private Label tituloPrincipal;
         private Button btnMinecraftDungeon;
         private Button btnAqw;
+        private Button btnAutoClickerNormal;
         private Panel panelContenedor;
     }
 }
