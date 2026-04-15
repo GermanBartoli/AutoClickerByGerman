@@ -63,12 +63,15 @@ namespace AutoClickerByGerman
         private readonly byte[] secuenciaAutoatack = { VK_1, VK_2, VK_3, VK_4, VK_5 };
         private readonly int intervaloAutoatackEntreTeclas = 1500;
         private readonly int intervaloAutoatackEntreCiclos = 1500;
-        private readonly byte[] secuenciaVhl = { VK_2, VK_3, VK_4, VK_5, VK_1 };
-        private readonly int[] cooldownsVhlMs = { 3000, 4000, 3000, 10000, 7000 };
-        private readonly byte[] secuenciaRevenant = { VK_2, VK_3, VK_4, VK_5, VK_1 };
-        private readonly int[] cooldownsRevenantMs = { 4000, 4000, 5000, 7000, 10000 };
+        private readonly byte[] secuenciaVhl = { VK_3, VK_1, VK_2, VK_4, VK_5 };
+        private readonly int[] cooldownsVhlMs = { 4000, 3000, 3000, 3000, 7000 };
+        private readonly byte[] secuenciaRevenant = { VK_2, VK_1, VK_3, VK_4, VK_5 };
+        private readonly int[] cooldownsRevenantMs = { 4000, 3000, 4000, 5000, 7000 };
         private readonly byte[] secuenciaYami = { VK_1, VK_2, VK_3, VK_4, VK_5 };
         private readonly int[] cooldownsYamiMs = { 4000, 5000, 2000, 4000, 4000 };
+        private const int indiceVhlTeclaUno = 1;
+        private const int indiceRevenantTeclaUno = 1;
+        private const int indiceYamiTeclaUno = 0;
         private readonly int intervaloMinimoGlobalMs = 1000;
 
         private Thread? hiloAutomatizacion;
@@ -80,6 +83,7 @@ namespace AutoClickerByGerman
         private bool vhlHabilitado;
         private bool revenantHabilitado;
         private bool yamiHabilitado;
+        private bool actualizandoChecksModo;
         private int indiceAutoatackActual;
         private int indiceYamiSiguiente;
         private DateTime proximoAutoatackUtc = DateTime.MinValue;
@@ -183,6 +187,11 @@ namespace AutoClickerByGerman
 
         private void chkVhl_CheckedChanged(object sender, EventArgs e)
         {
+            if (!actualizandoChecksModo && chkVhl.Checked)
+            {
+                ActualizarChecksModoExclusivo(chkVhl);
+            }
+
             lock (syncProgramacion)
             {
                 vhlHabilitado = chkVhl.Checked;
@@ -201,6 +210,11 @@ namespace AutoClickerByGerman
 
         private void chkRevenant_CheckedChanged(object sender, EventArgs e)
         {
+            if (!actualizandoChecksModo && chkRevenant.Checked)
+            {
+                ActualizarChecksModoExclusivo(chkRevenant);
+            }
+
             lock (syncProgramacion)
             {
                 revenantHabilitado = chkRevenant.Checked;
@@ -219,6 +233,11 @@ namespace AutoClickerByGerman
 
         private void chkYami_CheckedChanged(object sender, EventArgs e)
         {
+            if (!actualizandoChecksModo && chkYami.Checked)
+            {
+                ActualizarChecksModoExclusivo(chkYami);
+            }
+
             lock (syncProgramacion)
             {
                 yamiHabilitado = chkYami.Checked;
@@ -233,6 +252,22 @@ namespace AutoClickerByGerman
                         proximosYamiUtc[i] = ahoraUtc;
                     }
                 }
+            }
+        }
+
+        private void ActualizarChecksModoExclusivo(CheckBox checkSeleccionado)
+        {
+            actualizandoChecksModo = true;
+
+            try
+            {
+                chkVhl.Checked = checkSeleccionado == chkVhl;
+                chkRevenant.Checked = checkSeleccionado == chkRevenant;
+                chkYami.Checked = checkSeleccionado == chkYami;
+            }
+            finally
+            {
+                actualizandoChecksModo = false;
             }
         }
 
@@ -340,7 +375,12 @@ namespace AutoClickerByGerman
 
                 lock (syncProgramacion)
                 {
-                    proximoEnvioGlobalUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
+                    bool teclaUnoPrioritaria = tecla == VK_1 && (modo == ModoDisparo.Vhl || modo == ModoDisparo.Revenant || modo == ModoDisparo.Yami);
+
+                    if (!teclaUnoPrioritaria)
+                    {
+                        proximoEnvioGlobalUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
+                    }
 
                     if (modo == ModoDisparo.Autoatack && autoatackHabilitado)
                     {
@@ -380,6 +420,12 @@ namespace AutoClickerByGerman
                 {
                     esperaMs = 150;
                     return false;
+                }
+
+                if (IntentarSeleccionarTeclaUnoPrioritaria(ahoraUtc, out tecla, out modo, out indiceModo))
+                {
+                    esperaMs = 20;
+                    return true;
                 }
 
                 if (proximoEnvioGlobalUtc > ahoraUtc)
@@ -475,6 +521,54 @@ namespace AutoClickerByGerman
 
             esperaMs = (int)Math.Max(20, Math.Min(200, (proximaRevisionUtc - ahoraUtc).TotalMilliseconds));
             return false;
+        }
+
+        private bool IntentarSeleccionarTeclaUnoPrioritaria(DateTime ahoraUtc, out byte tecla, out ModoDisparo modo, out int indiceModo)
+        {
+            tecla = 0;
+            modo = ModoDisparo.Ninguno;
+            indiceModo = -1;
+            DateTime mejorMomentoUtc = DateTime.MaxValue;
+
+            if (vhlHabilitado && indiceVhlTeclaUno >= 0 && indiceVhlTeclaUno < proximosVhlUtc.Length)
+            {
+                DateTime proximoVhlUtc = proximosVhlUtc[indiceVhlTeclaUno];
+
+                if (proximoVhlUtc <= ahoraUtc && proximoVhlUtc <= mejorMomentoUtc)
+                {
+                    mejorMomentoUtc = proximoVhlUtc;
+                    tecla = VK_1;
+                    modo = ModoDisparo.Vhl;
+                    indiceModo = indiceVhlTeclaUno;
+                }
+            }
+
+            if (revenantHabilitado && indiceRevenantTeclaUno >= 0 && indiceRevenantTeclaUno < proximosRevenantUtc.Length)
+            {
+                DateTime proximoRevenantUtc = proximosRevenantUtc[indiceRevenantTeclaUno];
+
+                if (proximoRevenantUtc <= ahoraUtc && proximoRevenantUtc <= mejorMomentoUtc)
+                {
+                    mejorMomentoUtc = proximoRevenantUtc;
+                    tecla = VK_1;
+                    modo = ModoDisparo.Revenant;
+                    indiceModo = indiceRevenantTeclaUno;
+                }
+            }
+
+            if (yamiHabilitado && indiceYamiTeclaUno >= 0 && indiceYamiTeclaUno < proximosYamiUtc.Length)
+            {
+                DateTime proximoYamiUtc = proximosYamiUtc[indiceYamiTeclaUno];
+
+                if (proximoYamiUtc <= ahoraUtc && proximoYamiUtc <= mejorMomentoUtc)
+                {
+                    tecla = VK_1;
+                    modo = ModoDisparo.Yami;
+                    indiceModo = indiceYamiTeclaUno;
+                }
+            }
+
+            return modo != ModoDisparo.Ninguno;
         }
 
         private void AvanzarAutoatack(DateTime enviadoUtc)
