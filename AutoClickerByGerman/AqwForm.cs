@@ -62,7 +62,6 @@ namespace AutoClickerByGerman
 
         private readonly byte[] secuenciaAutoatack = { VK_1, VK_2, VK_3, VK_4, VK_5 };
         private readonly int intervaloAutoatackEntreTeclas = 1500;
-        private readonly int intervaloAutoatackEntreCiclos = 1500;
         private readonly byte[] secuenciaVhl = { VK_3, VK_1, VK_2, VK_4, VK_5 };
         private readonly int[] cooldownsVhlMs = { 4000, 3000, 3000, 3000, 7000 };
         private readonly byte[] secuenciaRevenant = { VK_2, VK_1, VK_3, VK_4, VK_5 };
@@ -573,11 +572,8 @@ namespace AutoClickerByGerman
 
         private void AvanzarAutoatack(DateTime enviadoUtc)
         {
-            bool esUltimaTecla = indiceAutoatackActual == secuenciaAutoatack.Length - 1;
-            int pausaMs = esUltimaTecla ? intervaloAutoatackEntreCiclos : intervaloAutoatackEntreTeclas;
-
             indiceAutoatackActual = (indiceAutoatackActual + 1) % secuenciaAutoatack.Length;
-            proximoAutoatackUtc = enviadoUtc.AddMilliseconds(pausaMs);
+            proximoAutoatackUtc = enviadoUtc.AddMilliseconds(intervaloAutoatackEntreTeclas);
         }
 
         private bool EsperarConCancelacion(int esperaMs)
