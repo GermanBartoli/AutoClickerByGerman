@@ -63,15 +63,12 @@ namespace AutoClickerByGerman
         private readonly byte[] secuenciaAutoatack = { VK_1, VK_2, VK_3, VK_4, VK_5 };
         private readonly int intervaloAutoatackEntreTeclas = 1500;
         private readonly byte[] secuenciaVhl = { VK_3, VK_1, VK_2, VK_4, VK_5 };
-        private readonly int[] cooldownsVhlMs = { 4000, 3000, 3000, 3000, 7000 };
+        private readonly int[] cooldownsVhlMs = { 4000, 2000, 3000, 3000, 6000 };
         private readonly byte[] secuenciaRevenant = { VK_2, VK_1, VK_3, VK_4, VK_5 };
-        private readonly int[] cooldownsRevenantMs = { 4000, 3000, 4000, 5000, 7000 };
+        private readonly int[] cooldownsRevenantMs = { 4000, 2000, 4000, 5000, 6000 };
         private readonly byte[] secuenciaYami = { VK_1, VK_2, VK_3, VK_4, VK_5 };
-        private readonly int[] cooldownsYamiMs = { 4000, 5000, 2000, 4000, 4000 };
-        private const int indiceVhlTeclaUno = 1;
-        private const int indiceRevenantTeclaUno = 1;
-        private const int indiceYamiTeclaUno = 0;
-        private readonly int intervaloMinimoGlobalMs = 1000;
+        private readonly int[] cooldownsYamiMs = { 2000, 5000, 2000, 4000, 4000 };
+        private readonly int intervaloMinimoGlobalMs = 1500;
 
         private Thread? hiloAutomatizacion;
         private bool automatizacionActiva;
@@ -84,11 +81,13 @@ namespace AutoClickerByGerman
         private bool yamiHabilitado;
         private bool actualizandoChecksModo;
         private int indiceAutoatackActual;
+        private int indiceVhlSiguiente;
+        private int indiceRevenantSiguiente;
         private int indiceYamiSiguiente;
         private DateTime proximoAutoatackUtc = DateTime.MinValue;
-        private readonly DateTime[] proximosVhlUtc = new DateTime[5];
-        private readonly DateTime[] proximosRevenantUtc = new DateTime[5];
-        private readonly DateTime[] proximosYamiUtc = new DateTime[5];
+        private DateTime proximoVhlUtc = DateTime.MinValue;
+        private DateTime proximoRevenantUtc = DateTime.MinValue;
+        private DateTime proximoYamiUtc = DateTime.MinValue;
         private DateTime proximoEnvioGlobalUtc = DateTime.MinValue;
 
         private enum ModoDisparo
@@ -197,12 +196,8 @@ namespace AutoClickerByGerman
 
                 if (vhlHabilitado)
                 {
-                    DateTime ahoraUtc = DateTime.UtcNow;
-
-                    for (int i = 0; i < proximosVhlUtc.Length; i++)
-                    {
-                        proximosVhlUtc[i] = ahoraUtc;
-                    }
+                    indiceVhlSiguiente = 0;
+                    proximoVhlUtc = DateTime.UtcNow;
                 }
             }
         }
@@ -220,12 +215,8 @@ namespace AutoClickerByGerman
 
                 if (revenantHabilitado)
                 {
-                    DateTime ahoraUtc = DateTime.UtcNow;
-
-                    for (int i = 0; i < proximosRevenantUtc.Length; i++)
-                    {
-                        proximosRevenantUtc[i] = ahoraUtc;
-                    }
+                    indiceRevenantSiguiente = 0;
+                    proximoRevenantUtc = DateTime.UtcNow;
                 }
             }
         }
@@ -243,13 +234,8 @@ namespace AutoClickerByGerman
 
                 if (yamiHabilitado)
                 {
-                    DateTime ahoraUtc = DateTime.UtcNow;
                     indiceYamiSiguiente = 0;
-
-                    for (int i = 0; i < proximosYamiUtc.Length; i++)
-                    {
-                        proximosYamiUtc[i] = ahoraUtc;
-                    }
+                    proximoYamiUtc = DateTime.UtcNow;
                 }
             }
         }
@@ -312,24 +298,14 @@ namespace AutoClickerByGerman
         {
             DateTime ahoraUtc = DateTime.UtcNow;
             indiceAutoatackActual = 0;
+            indiceVhlSiguiente = 0;
+            indiceRevenantSiguiente = 0;
             indiceYamiSiguiente = 0;
             proximoAutoatackUtc = ahoraUtc;
+            proximoVhlUtc = ahoraUtc;
+            proximoRevenantUtc = ahoraUtc;
+            proximoYamiUtc = ahoraUtc;
             proximoEnvioGlobalUtc = ahoraUtc;
-
-            for (int i = 0; i < proximosVhlUtc.Length; i++)
-            {
-                proximosVhlUtc[i] = ahoraUtc;
-            }
-
-            for (int i = 0; i < proximosRevenantUtc.Length; i++)
-            {
-                proximosRevenantUtc[i] = ahoraUtc;
-            }
-
-            for (int i = 0; i < proximosYamiUtc.Length; i++)
-            {
-                proximosYamiUtc[i] = ahoraUtc;
-            }
         }
 
         private void EjecutarAutomatizacion()
@@ -374,31 +350,29 @@ namespace AutoClickerByGerman
 
                 lock (syncProgramacion)
                 {
-                    bool teclaUnoPrioritaria = tecla == VK_1 && (modo == ModoDisparo.Vhl || modo == ModoDisparo.Revenant || modo == ModoDisparo.Yami);
-
-                    if (!teclaUnoPrioritaria)
-                    {
-                        proximoEnvioGlobalUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
-                    }
+                    proximoEnvioGlobalUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
 
                     if (modo == ModoDisparo.Autoatack && autoatackHabilitado)
                     {
                         AvanzarAutoatack(enviadoUtc);
                     }
 
-                    if (modo == ModoDisparo.Vhl && indiceModo >= 0 && indiceModo < proximosVhlUtc.Length && vhlHabilitado)
+                    if (modo == ModoDisparo.Vhl && indiceModo >= 0 && indiceModo < secuenciaVhl.Length && vhlHabilitado)
                     {
-                        proximosVhlUtc[indiceModo] = enviadoUtc.AddMilliseconds(cooldownsVhlMs[indiceModo]);
+                        indiceVhlSiguiente = (indiceModo + 1) % secuenciaVhl.Length;
+                        proximoVhlUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
                     }
 
-                    if (modo == ModoDisparo.Revenant && indiceModo >= 0 && indiceModo < proximosRevenantUtc.Length && revenantHabilitado)
+                    if (modo == ModoDisparo.Revenant && indiceModo >= 0 && indiceModo < secuenciaRevenant.Length && revenantHabilitado)
                     {
-                        proximosRevenantUtc[indiceModo] = enviadoUtc.AddMilliseconds(cooldownsRevenantMs[indiceModo]);
+                        indiceRevenantSiguiente = (indiceModo + 1) % secuenciaRevenant.Length;
+                        proximoRevenantUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
                     }
 
-                    if (modo == ModoDisparo.Yami && indiceModo >= 0 && indiceModo < proximosYamiUtc.Length && yamiHabilitado)
+                    if (modo == ModoDisparo.Yami && indiceModo >= 0 && indiceModo < secuenciaYami.Length && yamiHabilitado)
                     {
-                        proximosYamiUtc[indiceModo] = enviadoUtc.AddMilliseconds(cooldownsYamiMs[indiceModo]);
+                        indiceYamiSiguiente = (indiceModo + 1) % secuenciaYami.Length;
+                        proximoYamiUtc = enviadoUtc.AddMilliseconds(intervaloMinimoGlobalMs);
                     }
                 }
             }
@@ -408,6 +382,7 @@ namespace AutoClickerByGerman
         {
             DateTime ahoraUtc = DateTime.UtcNow;
             DateTime proximaRevisionUtc = DateTime.MaxValue;
+            DateTime mejorMomentoUtc = DateTime.MaxValue;
 
             tecla = 0;
             modo = ModoDisparo.Ninguno;
@@ -421,94 +396,35 @@ namespace AutoClickerByGerman
                     return false;
                 }
 
-                if (IntentarSeleccionarTeclaUnoPrioritaria(ahoraUtc, out tecla, out modo, out indiceModo))
-                {
-                    esperaMs = 20;
-                    return true;
-                }
-
                 if (proximoEnvioGlobalUtc > ahoraUtc)
                 {
-                    esperaMs = (int)Math.Max(20, Math.Min(200, (proximoEnvioGlobalUtc - ahoraUtc).TotalMilliseconds));
-                    return false;
+                    proximaRevisionUtc = proximoEnvioGlobalUtc;
                 }
 
                 if (autoatackHabilitado)
                 {
-                    if (proximoAutoatackUtc <= ahoraUtc)
-                    {
-                        tecla = secuenciaAutoatack[indiceAutoatackActual];
-                        modo = ModoDisparo.Autoatack;
-                        esperaMs = 20;
-                        return true;
-                    }
-
-                    proximaRevisionUtc = proximoAutoatackUtc;
+                    EvaluarCandidato(ahoraUtc, proximoAutoatackUtc, secuenciaAutoatack[indiceAutoatackActual], ModoDisparo.Autoatack, indiceAutoatackActual, ref tecla, ref modo, ref indiceModo, ref mejorMomentoUtc, ref proximaRevisionUtc);
                 }
 
                 if (vhlHabilitado)
                 {
-                    for (int i = 0; i < proximosVhlUtc.Length; i++)
-                    {
-                        if (proximosVhlUtc[i] <= ahoraUtc)
-                        {
-                            tecla = secuenciaVhl[i];
-                            modo = ModoDisparo.Vhl;
-                            indiceModo = i;
-                            esperaMs = 20;
-                            return true;
-                        }
-
-                        if (proximosVhlUtc[i] < proximaRevisionUtc)
-                        {
-                            proximaRevisionUtc = proximosVhlUtc[i];
-                        }
-                    }
+                    EvaluarCandidato(ahoraUtc, proximoVhlUtc, secuenciaVhl[indiceVhlSiguiente], ModoDisparo.Vhl, indiceVhlSiguiente, ref tecla, ref modo, ref indiceModo, ref mejorMomentoUtc, ref proximaRevisionUtc);
                 }
 
                 if (revenantHabilitado)
                 {
-                    for (int i = 0; i < proximosRevenantUtc.Length; i++)
-                    {
-                        if (proximosRevenantUtc[i] <= ahoraUtc)
-                        {
-                            tecla = secuenciaRevenant[i];
-                            modo = ModoDisparo.Revenant;
-                            indiceModo = i;
-                            esperaMs = 20;
-                            return true;
-                        }
-
-                        if (proximosRevenantUtc[i] < proximaRevisionUtc)
-                        {
-                            proximaRevisionUtc = proximosRevenantUtc[i];
-                        }
-                    }
+                    EvaluarCandidato(ahoraUtc, proximoRevenantUtc, secuenciaRevenant[indiceRevenantSiguiente], ModoDisparo.Revenant, indiceRevenantSiguiente, ref tecla, ref modo, ref indiceModo, ref mejorMomentoUtc, ref proximaRevisionUtc);
                 }
 
                 if (yamiHabilitado)
                 {
-                    int longitudYami = proximosYamiUtc.Length;
+                    EvaluarCandidato(ahoraUtc, proximoYamiUtc, secuenciaYami[indiceYamiSiguiente], ModoDisparo.Yami, indiceYamiSiguiente, ref tecla, ref modo, ref indiceModo, ref mejorMomentoUtc, ref proximaRevisionUtc);
+                }
 
-                    for (int offset = 0; offset < longitudYami; offset++)
-                    {
-                        int i = (indiceYamiSiguiente + offset) % longitudYami;
-
-                        if (proximosYamiUtc[i] <= ahoraUtc)
-                        {
-                            tecla = secuenciaYami[i];
-                            modo = ModoDisparo.Yami;
-                            indiceModo = i;
-                            indiceYamiSiguiente = (i + 1) % longitudYami;
-                            esperaMs = 20;
-                            return true;
-                        }
-
-                        if (proximosYamiUtc[i] < proximaRevisionUtc)
-                        {
-                            proximaRevisionUtc = proximosYamiUtc[i];
-                        }
-                    }
+                if (modo != ModoDisparo.Ninguno && proximoEnvioGlobalUtc <= ahoraUtc)
+                {
+                    esperaMs = 20;
+                    return true;
                 }
             }
 
@@ -522,52 +438,35 @@ namespace AutoClickerByGerman
             return false;
         }
 
-        private bool IntentarSeleccionarTeclaUnoPrioritaria(DateTime ahoraUtc, out byte tecla, out ModoDisparo modo, out int indiceModo)
+        private static void EvaluarCandidato(
+            DateTime ahoraUtc,
+            DateTime disponibleUtc,
+            byte teclaCandidata,
+            ModoDisparo modoCandidato,
+            int indiceCandidato,
+            ref byte tecla,
+            ref ModoDisparo modo,
+            ref int indiceModo,
+            ref DateTime mejorMomentoUtc,
+            ref DateTime proximaRevisionUtc)
         {
-            tecla = 0;
-            modo = ModoDisparo.Ninguno;
-            indiceModo = -1;
-            DateTime mejorMomentoUtc = DateTime.MaxValue;
-
-            if (vhlHabilitado && indiceVhlTeclaUno >= 0 && indiceVhlTeclaUno < proximosVhlUtc.Length)
+            if (disponibleUtc <= ahoraUtc)
             {
-                DateTime proximoVhlUtc = proximosVhlUtc[indiceVhlTeclaUno];
-
-                if (proximoVhlUtc <= ahoraUtc && proximoVhlUtc <= mejorMomentoUtc)
+                if (disponibleUtc <= mejorMomentoUtc)
                 {
-                    mejorMomentoUtc = proximoVhlUtc;
-                    tecla = VK_1;
-                    modo = ModoDisparo.Vhl;
-                    indiceModo = indiceVhlTeclaUno;
+                    mejorMomentoUtc = disponibleUtc;
+                    tecla = teclaCandidata;
+                    modo = modoCandidato;
+                    indiceModo = indiceCandidato;
                 }
+
+                return;
             }
 
-            if (revenantHabilitado && indiceRevenantTeclaUno >= 0 && indiceRevenantTeclaUno < proximosRevenantUtc.Length)
+            if (disponibleUtc < proximaRevisionUtc)
             {
-                DateTime proximoRevenantUtc = proximosRevenantUtc[indiceRevenantTeclaUno];
-
-                if (proximoRevenantUtc <= ahoraUtc && proximoRevenantUtc <= mejorMomentoUtc)
-                {
-                    mejorMomentoUtc = proximoRevenantUtc;
-                    tecla = VK_1;
-                    modo = ModoDisparo.Revenant;
-                    indiceModo = indiceRevenantTeclaUno;
-                }
+                proximaRevisionUtc = disponibleUtc;
             }
-
-            if (yamiHabilitado && indiceYamiTeclaUno >= 0 && indiceYamiTeclaUno < proximosYamiUtc.Length)
-            {
-                DateTime proximoYamiUtc = proximosYamiUtc[indiceYamiTeclaUno];
-
-                if (proximoYamiUtc <= ahoraUtc && proximoYamiUtc <= mejorMomentoUtc)
-                {
-                    tecla = VK_1;
-                    modo = ModoDisparo.Yami;
-                    indiceModo = indiceYamiTeclaUno;
-                }
-            }
-
-            return modo != ModoDisparo.Ninguno;
         }
 
         private void AvanzarAutoatack(DateTime enviadoUtc)
