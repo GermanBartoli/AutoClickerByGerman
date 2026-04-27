@@ -8,18 +8,17 @@ Este flujo permite enviar teclas a la ventana de AQW sin depender de que la vent
 2. La app espera 3 segundos para que el usuario cambie a la ventana de AQW.
 3. Se guarda el handle de la ventana activa como ventana objetivo.
 4. Al pulsar Iniciar, se levanta un hilo en segundo plano.
-5. El hilo recorre una secuencia de teclas y las envia con intervalo fijo.
+5. El hilo agenda teclas segun el modo activo y las envia respetando su temporizacion.
 
 ## Como se envia la entrada
 La app usa mensajes Win32 para enviar teclado a la ventana objetivo:
 
 - Se valida que el handle siga siendo valido.
 - Si la ventana esta minimizada, se intenta restaurar antes del envio.
-- Se calcula una lista de destinos:
-  - Ventana principal.
-  - Ventanas hijas.
-  - Control que tiene foco en el hilo de la ventana objetivo.
-- A cada destino se le envian:
+- Se intenta obtener el control con foco del hilo de la ventana objetivo.
+- Si existe un control con foco valido, se usa como destino del envio.
+- Si no existe, se usa la ventana principal como fallback.
+- Al destino elegido se le envian:
   - WM_ACTIVATE
   - WM_SETFOCUS
   - WM_KEYDOWN
@@ -38,7 +37,8 @@ Esto hace que el mensaje se parezca a un evento real de teclado.
 
 ## Ciclo de automatizacion
 - Estado ejecutando: while en segundo plano que agenda teclas por modo.
-- Separacion minima global entre teclas: 1000 ms para evitar choques.
+- Separacion minima global entre teclas de cola: 1500 ms para evitar choques.
+- En VHL, Revenant y Yami la tecla 1 tiene un temporizador independiente de 2000 ms y no bloquea la cola principal.
 - Detencion:
   - Boton Detener.
   - Cierre del formulario.
@@ -53,17 +53,26 @@ Esto hace que el mensaje se parezca a un evento real de teclado.
 
 ### VHL
 - Se activa con el checkbox VHL.
-- Ejecuta la clase con teclas y cooldown independiente:
-  - Tecla 2: 3 segundos.
-  - Tecla 3: 4 segundos.
-  - Tecla 4: 3 segundos.
-  - Tecla 5: 10 segundos.
-- Cada tecla se vuelve a enviar apenas termina su cooldown, siempre que se cumpla la separacion minima global de 1 segundo.
+- Es exclusivo con Revenant y Yami.
+- La cola principal usa la secuencia 3, 2, 4, 5.
+- La tecla 1 se dispara aparte cada 2000 ms, sin frenar la cola principal.
 
-### Autoatack + VHL al mismo tiempo
-- Se pueden activar ambos checks.
-- El scheduler evita enviar dos teclas pegadas y mantiene la separacion minima.
-- Si una tecla ya cumplio cooldown, queda lista y se envia en el siguiente hueco disponible.
+### Revenant
+- Se activa con el checkbox Revenant.
+- Es exclusivo con VHL y Yami.
+- La cola principal usa la secuencia 2, 3, 4, 5.
+- La tecla 1 se dispara aparte cada 2000 ms, sin frenar la cola principal.
+
+### Yami
+- Se activa con el checkbox Yami.
+- Es exclusivo con VHL y Revenant.
+- La cola principal usa la secuencia 2, 3, 4, 5.
+- La tecla 1 se dispara aparte cada 2000 ms, sin frenar la cola principal.
+
+### Autoatack combinado con un modo
+- Autoatack puede convivir con VHL, Revenant o Yami.
+- El scheduler evita enviar dos teclas pegadas en la cola principal y mantiene la separacion minima de 1500 ms.
+- La tecla 1 del modo activo puede dispararse en su propio tiempo aunque la cola principal siga procesando otras teclas.
 
 ## Ventajas de este enfoque
 - No obliga a mantener AQW en foco.
